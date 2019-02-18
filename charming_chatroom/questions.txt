@@ -1,0 +1,58 @@
+1) What is a socket?
+    Socket programming is a way of connecting two nodes on a network to communicate
+    with each other. One socket listens on a particular port at an IP, while other 
+    socket reaches out to the other to form a connection. Server forms the listener
+    socket while client reaches out to the server.
+
+2) What is the difference between the domains AF_INET and AF_UNIX?
+    If we want to communicate with a remote host, then need INET socket.
+    INET is bound to an IP address-port tuple, while a UNIX socket is "bound" to a 
+    special file on my filesystem. Generally, only processes running on the same machine
+    can communicate through the latter.
+
+
+3) What is the difference between SOCK_STREAM and SOCK_DGRAM?
+    SOCK_STREAM uses TCP. SOCK_DGRAM use UDP.
+    Stream socket doesn't preserve message boundaries.
+    Datagram socket preserve boundaries.
+    Performance should be the same since both types just go through local in-kernel memory,
+    just the buffer management is different.
+
+4) Why is it important to clear all the values the addrinfo struct before using it in getaddrinfo?
+
+
+5) What are ai_family and ai_socktype?
+    Address family
+    The socket type
+
+6) What does getaddrinfo do?
+    Convert domain names, hostnames, and IP address between human-readable text representations
+    and structured binary formats for the operating system's networking API.
+
+
+7) What does connect do?
+    Connects the socket referred to by the file descriptor sockfd to the address specified
+    by addr. 
+
+
+8) What is setsockopt?
+    Manipulate options for the socket referred to by the file descriptor sockfd.
+    It's optional but it helps in reuse of address and port
+
+
+9) What does bind do?
+    After creation of the socket, bind function binds the socket to the address and port
+    number specified in addr(custom data structure).
+
+10) What does listen do?
+    It puts the server socket in a passive mode, where it waits for the client to approach
+    the server to make a connection. The backlog, defines the maximum length to which the queue
+    of pending connections for sockfd may grow. If a connection request arrives when the queue
+    is full, the client may receive an error with an indication of ECONNREFUSED.
+
+
+11) What does accept do?
+    It extracts the first connection request on the queue of pending connections for the listening
+    socket, sockfd, creates a new connected socket, and returns a new file descriptr referring
+    to that socket. At this point, connection is established between client and server, and they are
+    ready to transfer data
