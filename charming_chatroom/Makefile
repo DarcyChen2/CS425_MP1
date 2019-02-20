@@ -1,12 +1,9 @@
-
 OBJS_DIR = .objs
 
-# define all the student executables
 EXE_CLIENT=client
 EXE_SERVER=server
 EXES_STUDENT=$(EXE_CLIENT) $(EXE_SERVER)
 
-# list object file dependencies for each
 OBJS_CLIENT=$(EXE_CLIENT).o client.o utils.o
 OBJS_SERVER=$(EXE_SERVER).o utils.o
 
