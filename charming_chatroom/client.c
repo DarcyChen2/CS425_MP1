@@ -202,6 +202,7 @@ void *read_from_server(void *arg) {
     pthread_cleanup_push(thread_cancellation_handler, &cancellation_args);
     int msg_count = 0;
     ssize_t msg_num = -1;
+    Node* pd = NULL;
 
     while (retval > 0) {
         retval = get_message_size(serverSocket);
@@ -209,37 +210,44 @@ void *read_from_server(void *arg) {
             buffer = calloc(1, retval);
             retval = read_all_from_socket(serverSocket, buffer, retval);
             msg_num = get_msg_num(serverSocket);
+            if(retval > 0){
+                if(pd == NULL){
+                    pd = newNode(buffer, msg_num); 
+                }else{
+                    push(&pd, buffer, msg_num);
+                }                
+            }
             printf("msg_num is %lu\n", msg_num); // debug
         }
 
-        if (retval > 0){
-            if(msg_num == msg_count){
-                int is_self = 1;
-                unsigned int len = strlen(name);
-                for(unsigned int i = 0; i < len; i++){
-                    if(name[i] != buffer[i]){
-                        is_self = 0;
-                        break;
-                    }
-                }
-                if(buffer[len] != ':'){
+        while(!isEmpty(&pd) && msg_count == peek_p(&pd)){
+
+            buffer = pop(&pd);
+            msg_count++;
+            
+            int is_self = 1;
+            unsigned int len = strlen(name);
+            for(unsigned int i = 0; i < len; i++){
+                if(name[i] != buffer[i]){
                     is_self = 0;
-                }
-
-                if(!is_self){
-
-                    printf("%s\n", buffer);
+                    break;
                 }
             }
+            if(buffer[len] != ':'){
+                is_self = 0;
+            }
 
+            if(!is_self){
 
+                printf("%s\n", buffer);
+            }
 
         }
 
 
 
-        free(buffer);
-        buffer = NULL;
+        // free(buffer);
+        // buffer = NULL;
     }
 
     pthread_cleanup_pop(0);

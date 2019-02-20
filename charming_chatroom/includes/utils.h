@@ -20,9 +20,9 @@ typedef struct node {
 
 Node* newNode(char *d, int p);
 
-char *peek(Node** head); 
+int peek_p(Node** head);
 
-void pop(Node** head);
+char *pop(Node** head);
 
 void push(Node** head, char *d, int p);
 

@@ -27,19 +27,22 @@ Node* newNode(char *d, int p)
 
   
 // Return the value at head 
-char *peek(Node** head) 
+int peek_p(Node** head) 
 { 
-    return (*head)->data; 
+    return (*head)->priority; 
 } 
   
 
 // Removes the element with the 
 // highest priority form the list 
-void pop(Node** head) 
+char *pop(Node** head) 
 { 
     Node* temp = *head; 
     (*head) = (*head)->next; 
-    free(temp); 
+    char *data = temp->data;
+    free(temp);
+
+    return data;
 } 
   
 
