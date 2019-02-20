@@ -1,8 +1,3 @@
-/**
-* Chatroom Lab
-* CS 241 - Fall 2018
-*/
-
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netdb.h>
@@ -27,7 +22,6 @@ static volatile int msg_count;
 static volatile int serverSocket;
 static volatile int endSession;
 static volatile int n;
-
 static volatile int clientsCount;
 static volatile int clients[MAX_CLIENTS];
 static volatile char* clients_name[MAX_CLIENTS];
@@ -58,9 +52,6 @@ void close_server() {
     }    
     pthread_exit(NULL);
     exit(EXIT_SUCCESS);
-
-    //cleanup()
-    // add any additional flags here you want.
 }
 
 /**
@@ -83,14 +74,6 @@ void cleanup() {
         }
     }
 }
-
-
-// void exit_failure(){
-//     close_server();
-//     cleanup();
-//     pthread_exit(NULL);
-//     exit(1);
-// }
 
 /**
  * Sets up a server connection.
@@ -133,7 +116,6 @@ void run_server(char *port) {
     if (retval != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(retval)); // fprintf for getaddrinfo
         exit(1);
-        //exit_failure();
     }
 
     addr_result = result;
@@ -145,19 +127,16 @@ void run_server(char *port) {
     if (retval == -1) {
         perror("setsockopt()");
         exit(1);
-        //exit_failure();
     }
 
     if (bind(serverSocket, result->ai_addr, result->ai_addrlen) != 0) {
         perror("bind()");
         exit(1);
-        //exit_failure();
     }
 
     if (listen(serverSocket, MAX_CLIENTS) != 0) {
         perror("listen()");
         exit(1);
-        //exit_failure();
     }
 
     while (endSession == 0) {
