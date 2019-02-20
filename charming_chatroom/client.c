@@ -15,7 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "chat_window.h"
+// #include "chat_window.h"
 #include "utils.h"
 
 static volatile int serverSocket;
@@ -68,7 +68,6 @@ int connect_to_server(const char *host, const char *port) {
 
     struct addrinfo hints, *result;
     memset(&hints, 0, sizeof(struct addrinfo)); 
-    //memset(&result, 0, sizeof(struct addrinfo));
 
     hints.ai_family   = AF_INET; /* IPv4 only */
     hints.ai_socktype = SOCK_STREAM; /* TCP */
@@ -120,6 +119,33 @@ void thread_cancellation_handler(void *arg) {
     }
 }
 
+
+void read_message_from_input(char** buffer){
+
+    // Allocate buffer if needed
+    if (*buffer == NULL)
+        *buffer = calloc(1, MSG_SIZE);
+    else
+        memset(*buffer, 0, MSG_SIZE);
+
+
+    if (fgets(*buffer, MSG_SIZE, stdin) == NULL) {
+        fprintf(stderr, "fgets():");
+        exit(1);
+    }
+        
+    char* ptr = *buffer;
+    while (*ptr) {
+        if (*ptr == '\n') {
+            *ptr = '\0';
+            break;
+        }
+        ptr++;
+    }
+
+    return;
+}
+
 /**
  * Reads bytes from user and writes them to server.
  *
@@ -140,7 +166,8 @@ void *write_to_server(void *arg) {
     pthread_cleanup_push(thread_cancellation_handler, &cancel_args);
 
     while (retval > 0) {
-        read_message_from_screen(&buffer);
+        // read_message_from_screen(&buffer);
+        read_message_from_input(&buffer);
         if (buffer == NULL)
             break;
 
@@ -181,7 +208,9 @@ void *read_from_server(void *arg) {
             retval = read_all_from_socket(serverSocket, buffer, retval);
         }
         if (retval > 0)
-            write_message_to_screen("%s\n", buffer);
+            // write_message_to_screen("%s\n", buffer);
+            printf("%s\n", buffer);
+
 
         free(buffer);
         buffer = NULL;
@@ -198,33 +227,26 @@ void close_program(int signal) {
     if (signal == SIGINT) {
         pthread_cancel(threads[0]);
         pthread_cancel(threads[1]);
-        close_chat();
+        // close_chat();
         close_server_connection();
     }
 }
 
 int main(int argc, char **argv) {
-    if (argc < 4 || argc > 5) {
-        fprintf(stderr, "Usage: %s <address> <port> <username> [output_file]\n",
-                argv[0]);
-        exit(1);
-    }
 
-    char *output_filename;
-    if (argc == 5) {
-        output_filename = argv[4];
-    } else {
-        output_filename = NULL;
+    if(argc != 4){
+        fprintf(stderr, "Usage: %s <name> <port> <n>\n", argv[0]);
+        exit(1);
     }
 
     // Setup signal handler.
     signal(SIGINT, close_program);
-    create_windows(output_filename);
-    atexit(destroy_windows);
 
-    serverSocket = connect_to_server(argv[1], argv[2]);
+    serverSocket = connect_to_server("sp19-cs425-g25-01.cs.illinois.edu", argv[2]);
 
-    pthread_create(&threads[0], NULL, write_to_server, (void *)argv[3]);
+    printf("READY\n");
+
+    pthread_create(&threads[0], NULL, write_to_server, (void *)argv[1]);
     pthread_create(&threads[1], NULL, read_from_server, NULL);
 
     pthread_join(threads[0], NULL);

@@ -1,5 +1,3 @@
-.objs/client-debug.o: client.c includes/chat_window.h includes/utils.h
-
-includes/chat_window.h:
+.objs/client-debug.o: client.c includes/utils.h
 
 includes/utils.h:
