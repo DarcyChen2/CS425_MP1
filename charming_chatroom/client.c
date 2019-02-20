@@ -267,8 +267,17 @@ int main(int argc, char **argv) {
         retval = write_all_to_socket(serverSocket, name, len);
     }
 
-    printf("READY\n");
+    char* buffer = calloc(1, 6);
+    retval = get_message_size(serverSocket);
+    if (retval > 0) {
+        buffer = calloc(1, retval);
+        retval = read_all_from_socket(serverSocket, buffer, retval);
+    }
 
+    if(!strncmp(buffer, "READY", 5)){
+        printf("READY\n");
+    }
+    free(buffer);
 
     pthread_create(&threads[0], NULL, write_to_server, (void *)name);
     pthread_create(&threads[1], NULL, read_from_server, (void *)name);

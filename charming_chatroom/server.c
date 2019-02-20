@@ -17,18 +17,23 @@
 
 #include "utils.h"
 
-#define MAX_CLIENTS 8
+#define MAX_CLIENTS 10
 
 void *process_client(void *p);
+void write_to_clients(const char *message, size_t size); 
 
+static volatile int ready_go; // broadcast + msg count
+// static volatile int msg_count;
 static volatile int serverSocket;
 static volatile int endSession;
+static volatile int n;
 
 static volatile int clientsCount;
 static volatile int clients[MAX_CLIENTS];
 static volatile char* clients_name[MAX_CLIENTS];
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+// static pthread_mutex_t mutex_1 = PTHREAD_MUTEX_INITIALIZER;
 static struct addrinfo *addr_result;
 
 /**
@@ -157,7 +162,7 @@ void run_server(char *port) {
 
     while (endSession == 0) {
 
-        if (clientsCount < MAX_CLIENTS) {
+        if (clientsCount < n) {
 
             struct sockaddr clientAddr;
             socklen_t clientAddrlen = sizeof(struct sockaddr);
@@ -190,7 +195,27 @@ void run_server(char *port) {
 
             pthread_t thread;
             pthread_create(&thread, NULL, (void *)process_client, (void *)clientId);
+
+        }else if(ready_go == 0){
+
+            int get_name = 1;
+            for(int i = 0; i < n; i++){
+                if(clients_name[i] == NULL){
+                    get_name = 0;
+                    break;
+                }
+            }
+            if(get_name){
+                ready_go = 1;
+                /*broadcast "READY"*/
+                printf("ready!\n"); // debug info
+                write_to_clients("READY", 6);
+            }    
+
         }
+
+
+        
     } // End of while loop
 
     // Cleanup
@@ -261,7 +286,7 @@ void *process_client(void *p) {
     free(leave_client);
 
     printf("User %d left\n", (int)clientId); // debug info
-    
+
     close(clients[clientId]);
 
     pthread_mutex_lock(&mutex);
@@ -277,8 +302,8 @@ void *process_client(void *p) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        fprintf(stderr, "%s <port>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "%s <port> <n>\n", argv[0]);
         return -1;
     }
 
@@ -291,6 +316,8 @@ int main(int argc, char **argv) {
     }
 
     signal(SIGINT, close_server);
+    n = atoi(argv[2]);
+    ready_go = 0;
     run_server(argv[1]);
     cleanup();
     pthread_exit(NULL);
