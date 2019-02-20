@@ -217,7 +217,7 @@ void *read_from_server(void *arg) {
                     push(&pd, buffer, msg_num);
                 }                
             }
-            printf("msg_num is %lu\n", msg_num); // debug
+            printf("#msg_num is %lu\n", msg_num); // debug
         }
 
         while(!isEmpty(&pd) && msg_count == peek_p(&pd)){

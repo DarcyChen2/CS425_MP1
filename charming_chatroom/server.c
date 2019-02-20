@@ -208,7 +208,7 @@ void run_server(char *port) {
             if(get_name){
                 ready_go = 1;
                 /*broadcast "READY"*/
-                printf("ready!\n"); // debug info
+                printf("#ready!\n"); // debug info
                 write_to_clients("READY", -1, 6);
             }    
 
@@ -297,7 +297,7 @@ void *process_client(void *p) {
     size_t msg_len = strlen(leave_msg) + 1;
     free(leave_client);
 
-    printf("User %d left\n", (int)clientId); // debug info
+    printf("#User %d left\n", (int)clientId); // debug info
 
     close(clients[clientId]);
 

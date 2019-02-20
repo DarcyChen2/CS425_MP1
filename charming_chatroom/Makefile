@@ -7,8 +7,8 @@ EXE_SERVER=server
 EXES_STUDENT=$(EXE_CLIENT) $(EXE_SERVER)
 
 # list object file dependencies for each
-OBJS_CLIENT=$(EXE_CLIENT).o chat_window.o user_hooks.o client.o utils.o
-OBJS_SERVER=$(EXE_SERVER).o user_hooks.o utils.o
+OBJS_CLIENT=$(EXE_CLIENT).o client.o utils.o
+OBJS_SERVER=$(EXE_SERVER).o utils.o
 
 # set up compiler
 CC = clang
@@ -19,17 +19,7 @@ CFLAGS_RELEASE = -O2 $(WARNINGS) $(INCLUDES) -std=c99 -c -MMD -MP -D_GNU_SOURCE 
 
 # set up linker
 LD = clang
-LDFLAGS = -pthread -lncurses -lm
-
-# the string in grep must appear in the hostname, otherwise the Makefile will
-# not allow the assignment to compile
-# IS_VM=$(shell hostname | grep "cs425")
-# VM_OVERRIDE=$(shell echo $$HOSTNAME)
-# ifeq ($(IS_VM),)
-# ifneq ($(VM_OVERRIDE),cs241grader)
-# $(error This assignment must be compiled on the CS241 VMs)
-# endif
-# endif
+LDFLAGS = -pthread -lm
 
 .PHONY: all
 all: release
