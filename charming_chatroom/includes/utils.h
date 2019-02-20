@@ -9,7 +9,7 @@
 
 
 typedef struct node { 
-    int data; 
+    char *data; 
   
     // Lower values indicate higher priority 
     int priority; 
@@ -18,13 +18,13 @@ typedef struct node {
   
 } Node; 
 
-Node* newNode(int d, int p);
+Node* newNode(char *d, int p);
 
-int peek(Node** head); 
+char *peek(Node** head); 
 
 void pop(Node** head);
 
-void push(Node** head, int d, int p);
+void push(Node** head, char *d, int p);
 
 int isEmpty(Node** head); 
 

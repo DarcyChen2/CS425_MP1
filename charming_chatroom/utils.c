@@ -15,7 +15,7 @@ static const size_t MESSAGE_SIZE_DIGITS = 4;
   
 
 // Function to Create A New Node 
-Node* newNode(int d, int p) 
+Node* newNode(char *d, int p) 
 { 
     Node* temp = (Node*)malloc(sizeof(Node)); 
     temp->data = d; 
@@ -24,13 +24,15 @@ Node* newNode(int d, int p)
   
     return temp; 
 } 
+
   
 // Return the value at head 
-int peek(Node** head) 
+char *peek(Node** head) 
 { 
     return (*head)->data; 
 } 
   
+
 // Removes the element with the 
 // highest priority form the list 
 void pop(Node** head) 
@@ -40,8 +42,9 @@ void pop(Node** head)
     free(temp); 
 } 
   
+
 // Function to push according to priority 
-void push(Node** head, int d, int p) 
+void push(Node** head, char *d, int p) 
 { 
     Node* start = (*head); 
   
@@ -79,6 +82,7 @@ int isEmpty(Node** head)
 { 
     return (*head) == NULL; 
 } 
+
 
 char *create_message(char *name, char *message) {
     int name_len = strlen(name);
