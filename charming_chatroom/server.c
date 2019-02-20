@@ -152,7 +152,6 @@ void run_server(char *port) {
             if((client_fd = accept(serverSocket, (struct sockaddr *) &clientAddr, &clientAddrlen)) < 0){
                 perror("accept");
                 exit(1);
-                //exit_failure();                
             }
             if (endSession != 0) {
                 fprintf(stderr, "accept():: Invalid argument\n");

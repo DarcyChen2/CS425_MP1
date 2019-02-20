@@ -1,9 +1,3 @@
-/**
-* Chatroom Lab
-* CS 241 - Fall 2018
-*/
-
-
 #include <errno.h>
 #include <netdb.h>
 #include <pthread.h>
@@ -15,7 +9,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// #include "chat_window.h"
 #include "utils.h"
 
 static volatile int serverSocket;
@@ -31,20 +24,14 @@ void close_program(int signal);
  * Called by close_program upon SIGINT.
  */
 void close_server_connection() {
-    // Your code here
+
     freeaddrinfo(addr_result);
     if (shutdown(serverSocket, SHUT_RDWR) != 0) {
         perror(NULL);
     }
     close(serverSocket);
-    //destroy_windows();
-}
 
-// void exit_failure() {
-//     destroy_windows();
-//     close_chat();
-//     exit(1);
-// }
+}
 
 /**
  * Sets up a connection to a chatroom server and returns
@@ -62,7 +49,6 @@ int connect_to_server(const char *host, const char *port) {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if(serverSocket == -1){
         perror(NULL);
-        //exit_failure();
         exit(1);
     }
 
@@ -100,6 +86,7 @@ typedef struct _thread_cancel_args {
     char **msg;
 } thread_cancel_args;
 
+
 /**
  * Cleanup routine in case the thread gets cancelled.
  * Ensure buffers are freed if they point to valid memory.
@@ -118,7 +105,6 @@ void thread_cancellation_handler(void *arg) {
         *msg = NULL;
     }
 }
-
 
 void read_message_from_input(char** buffer){
 
@@ -166,7 +152,6 @@ void *write_to_server(void *arg) {
     pthread_cleanup_push(thread_cancellation_handler, &cancel_args);
 
     while (retval > 0) {
-        // read_message_from_screen(&buffer);
         read_message_from_input(&buffer);
         if (buffer == NULL)
             break;
@@ -205,6 +190,7 @@ void *read_from_server(void *arg) {
     Node* pd = NULL;
 
     while (retval > 0) {
+
         retval = get_message_size(serverSocket);
         if (retval > 0) {
             buffer = calloc(1, retval);
@@ -233,21 +219,20 @@ void *read_from_server(void *arg) {
                     break;
                 }
             }
+
+            // Check if name has different length
             if(buffer[len] != ':'){
                 is_self = 0;
             }
 
             if(!is_self){
-
                 printf("%s\n", buffer);
             }
 
+            free(buffer);
+            buffer = NULL;
         }
 
-
-
-        // free(buffer);
-        // buffer = NULL;
     }
 
     pthread_cleanup_pop(0);
@@ -261,7 +246,6 @@ void close_program(int signal) {
     if (signal == SIGINT) {
         pthread_cancel(threads[0]);
         pthread_cancel(threads[1]);
-        // close_chat();
         close_server_connection();
     }
 }
@@ -289,7 +273,7 @@ int main(int argc, char **argv) {
     char* buffer = calloc(1, 6);
     retval = get_message_size(serverSocket);
     if (retval > 0) {
-        buffer = calloc(1, retval);
+        buffer = realloc(buffer, retval);
         retval = read_all_from_socket(serverSocket, buffer, retval);
     }
 
