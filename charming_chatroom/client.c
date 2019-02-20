@@ -37,7 +37,7 @@ void close_server_connection() {
  * Sets up a connection to a chatroom server and returns
  * the file descriptor associated with the connection.
  *
- * host - Server to connect to.
+ * host - Server to connect to, hardcoded to "sp19-cs425-g25-01.cs.illinois.edu"
  * port - Port to connect to server on.
  *
  * Returns integer of valid file descriptor, or exit(1) on failure.
@@ -89,7 +89,7 @@ typedef struct _thread_cancel_args {
 
 /**
  * Cleanup routine in case the thread gets cancelled.
- * Ensure buffers are freed if they point to valid memory.
+ * Free buffer as needed.
  */
 void thread_cancellation_handler(void *arg) {
     printf("Cancellation handler\n");
@@ -106,6 +106,10 @@ void thread_cancellation_handler(void *arg) {
     }
 }
 
+
+/**
+ * Read a line of message each time and allocate it on the heap
+*/
 void read_message_from_input(char** buffer){
 
     // Allocate buffer if needed
@@ -249,6 +253,7 @@ void close_program(int signal) {
         close_server_connection();
     }
 }
+
 
 int main(int argc, char **argv) {
 

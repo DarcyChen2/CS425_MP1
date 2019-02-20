@@ -30,6 +30,7 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t mutex_1 = PTHREAD_MUTEX_INITIALIZER;
 static struct addrinfo *addr_result;
 
+
 /**
  * Signal handler for SIGINT.
  * Used to set flag to end server.
@@ -54,6 +55,7 @@ void close_server() {
     exit(EXIT_SUCCESS);
 }
 
+
 /**
  * Cleanup function called in main after `run_server` exits.
  * Server ending clean up (such as shutting down clients) should be handled
@@ -75,18 +77,17 @@ void cleanup() {
     }
 }
 
+
 /**
  * Sets up a server connection.
- * Does not accept more than MAX_CLIENTS connections.  If more than MAX_CLIENTS
- * clients attempts to connects, simply shuts down
- * the new client and continues accepting.
+ * Keep accepting connection util reaches n connections. If accepted n connection,
+ * broadcast "READY" message to all connected clients
  * Per client, a thread should be created and 'process_client' should handle
  * that client.
- * Makes use of 'endSession', 'clientsCount', 'client', and 'mutex'.
  *
  * port - port server will run on.
  *
- * If any networking call fails, the appropriate error is printed and the
+ * Print error messages as needed and
  * function calls exit(1):
  *    - fprtinf to stderr for getaddrinfo
  *    - perror() for any other call
@@ -102,7 +103,6 @@ void run_server(char *port) {
     if (serverSocket == -1) {
         perror("socket failed.\n");
         exit(1);
-        //exit_failure();
     }   
 
     struct addrinfo hints, *result;
@@ -123,7 +123,7 @@ void run_server(char *port) {
     // After a socket is closed the port enters a time-out state during which time it cannot be re-used
     // Disable it
     int optval = 1;
-    // retval = setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+
     retval = setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
     if (retval == -1) {
         perror("setsockopt()");
@@ -192,19 +192,17 @@ void run_server(char *port) {
             }    
 
         }
-
-
         
     } // End of while loop
 
-    // Cleanup
     freeaddrinfo(result);
 }
 
 /**
- * Broadcasts the message to all connected clients.
+ * Broadcasts the message and timestamp to all connected clients.
  *
  * message  - the message to send to all clients.
+ * msg_num  - the timestamp of current message.
  * size     - length in bytes of message to send.
  */
 void write_to_clients(const char *message, const int msg_num, size_t size) {
@@ -226,13 +224,14 @@ void write_to_clients(const char *message, const int msg_num, size_t size) {
     pthread_mutex_unlock(&mutex);
 }
 
+
 /**
- * Handles the reading to and writing from clients.
+ * Processes the reading to and writing from clients.
  *
  * p  - (void*)intptr_t index where clients[(intptr_t)p] is the file descriptor
  * for this client.
  *
- * Return value not used.
+ * Always return NULL
  */
 void *process_client(void *p) {
     pthread_detach(pthread_self());
@@ -295,6 +294,7 @@ void *process_client(void *p) {
 
     return NULL;
 }
+
 
 int main(int argc, char **argv) {
     if (argc != 3) {
