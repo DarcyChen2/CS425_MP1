@@ -1,8 +1,3 @@
-/**
-* Chatroom Lab
-* CS 241 - Fall 2018
-*/
-
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -110,6 +105,7 @@ ssize_t get_msg_num(int socket){
     return get_message_size(socket);
 }
 
+
 ssize_t get_message_size(int socket) {
     int32_t size;
     ssize_t read_bytes =
@@ -126,7 +122,7 @@ ssize_t write_msg_num(size_t size, int socket){
 }
 
 
-// You may assume size won't be larger than a 4 byte integer
+// Assume size won't be larger than a 4 byte integer
 ssize_t write_message_size(size_t size, int socket) {
     // Your code here
     int32_t message_size = htonl(size);
@@ -136,8 +132,9 @@ ssize_t write_message_size(size_t size, int socket) {
     return write_bytes;
 }
 
+
 ssize_t read_all_from_socket(int socket, char *buffer, size_t count) {
-    // Your Code Here
+
     ssize_t bytes_read = 0;
     ssize_t bytes_remaining = count;
     ssize_t retval;
@@ -156,8 +153,9 @@ ssize_t read_all_from_socket(int socket, char *buffer, size_t count) {
     return count;
 }
 
+
 ssize_t write_all_to_socket(int socket, const char *buffer, size_t count) {
-    // Your Code Here
+
     ssize_t bytes_write = 0;
     ssize_t bytes_remaining = count;
     ssize_t retval;

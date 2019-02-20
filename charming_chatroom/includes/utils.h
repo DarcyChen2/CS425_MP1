@@ -18,15 +18,21 @@ typedef struct node {
   
 } Node; 
 
+
 Node* newNode(char *d, int p);
+
 
 int peek_p(Node** head);
 
+
 char *pop(Node** head);
+
 
 void push(Node** head, char *d, int p);
 
+
 int isEmpty(Node** head); 
+
 
 /**
  * Builds a message in the form of
@@ -37,7 +43,14 @@ int isEmpty(Node** head);
 char* create_message (char *name, char *message);
 
 
+/**
+ * Builds a message in the form of
+ * <name> has left QwQ
+ * 
+ * Returns a char* to the created message on the heap
+*/
 char *create_leave_message(char *name);
+
 
 /**
  * Read the first four bytes from socket and transform it into ssize_t
@@ -57,10 +70,23 @@ ssize_t get_message_size(int socket);
 ssize_t write_message_size(size_t size, int socket);
 
 
+/**
+ * Wrapper function of get_message_size that read msg_num from socket
+ * 
+ * Returns the msg_num,
+ * 0 if socket is disconnected, -1 on failure
+*/
 ssize_t get_msg_num(int socket);
 
 
+/**
+ * Wrapper function of write_message_size that write msg_num to socket
+ * 
+ * Returns the number of bytes successfullly written,
+ * 0 if socket is disconnected, or -1 on failure
+*/
 ssize_t write_msg_num(size_t size, int socket);
+
 
 /**
  * Attempts to read all count bytes from socket into buffer.

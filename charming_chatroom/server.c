@@ -123,7 +123,8 @@ void run_server(char *port) {
     // After a socket is closed the port enters a time-out state during which time it cannot be re-used
     // Disable it
     int optval = 1;
-    retval = setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+    // retval = setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+    retval = setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
     if (retval == -1) {
         perror("setsockopt()");
         exit(1);
