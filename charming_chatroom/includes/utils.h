@@ -16,6 +16,8 @@
 char* create_message (char *name, char *message);
 
 
+char *create_leave_message(char *name);
+
 /**
  * Read the first four bytes from socket and transform it into ssize_t
  * 

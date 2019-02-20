@@ -26,6 +26,7 @@ static volatile int endSession;
 
 static volatile int clientsCount;
 static volatile int clients[MAX_CLIENTS];
+static volatile char* clients_name[MAX_CLIENTS];
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static struct addrinfo *addr_result;
@@ -238,20 +239,39 @@ void *process_client(void *p) {
             buffer = calloc(1, retval);
             retval = read_all_from_socket(clients[clientId], buffer, retval);
         }
-        if (retval > 0)
-            write_to_clients(buffer, retval);
+
+        if (retval > 0){
+            if(clients_name[clientId] == NULL){
+                pthread_mutex_lock(&mutex);
+                clients_name[clientId] = strdup(buffer);
+                pthread_mutex_unlock(&mutex);
+            }else{
+                write_to_clients(buffer, retval);                  
+            }
+        }
+
 
         free(buffer);
         buffer = NULL;
     }
 
-    printf("User %d left\n", (int)clientId);
+    char *leave_client = (char *)clients_name[clientId];
+    char *leave_msg = create_leave_message(leave_client);
+    size_t msg_len = strlen(leave_msg) + 1;
+    free(leave_client);
+
+    printf("User %d left\n", (int)clientId); // debug info
+    
     close(clients[clientId]);
 
     pthread_mutex_lock(&mutex);
     clients[clientId] = -1;
     clientsCount--;
+    clients_name[clientId] = NULL;
     pthread_mutex_unlock(&mutex);
+
+    write_to_clients(leave_msg, msg_len);   
+    free(leave_msg);
 
     return NULL;
 }

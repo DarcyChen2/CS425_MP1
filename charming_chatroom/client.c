@@ -193,7 +193,7 @@ void *write_to_server(void *arg) {
  */
 void *read_from_server(void *arg) {
     // Silence the unused parameter warning.
-    (void)arg;
+    char *name = (char *)arg;
     ssize_t retval = 1;
     char *buffer = NULL;
     thread_cancel_args cancellation_args;
@@ -207,9 +207,24 @@ void *read_from_server(void *arg) {
             buffer = calloc(1, retval);
             retval = read_all_from_socket(serverSocket, buffer, retval);
         }
-        if (retval > 0)
-            // write_message_to_screen("%s\n", buffer);
-            printf("%s\n", buffer);
+        if (retval > 0){
+            int is_self = 1;
+            unsigned int len = strlen(name);
+            for(unsigned int i = 0; i < len; i++){
+                if(name[i] != buffer[i]){
+                    is_self = 0;
+                    break;
+                }
+            }
+            if(buffer[len] != ':'){
+                is_self = 0;
+            }
+
+            if(!is_self){
+                printf("%s\n", buffer);
+            }
+        }
+
 
 
         free(buffer);
@@ -244,10 +259,19 @@ int main(int argc, char **argv) {
 
     serverSocket = connect_to_server("sp19-cs425-g25-01.cs.illinois.edu", argv[2]);
 
+    char *name = argv[1];
+
+    size_t len = strlen(name) + 1;
+    int retval = write_message_size(len, serverSocket);
+    if(retval > 0){
+        retval = write_all_to_socket(serverSocket, name, len);
+    }
+
     printf("READY\n");
 
-    pthread_create(&threads[0], NULL, write_to_server, (void *)argv[1]);
-    pthread_create(&threads[1], NULL, read_from_server, NULL);
+
+    pthread_create(&threads[0], NULL, write_to_server, (void *)name);
+    pthread_create(&threads[1], NULL, read_from_server, (void *)name);
 
     pthread_join(threads[0], NULL);
     pthread_join(threads[1], NULL);

@@ -22,6 +22,16 @@ char *create_message(char *name, char *message) {
     return msg;
 }
 
+
+char *create_leave_message(char *name){
+    int name_len = strlen(name);
+    char *msg = calloc(1, name_len + 14);
+    sprintf(msg, "%s has left QwQ", name);
+
+    return msg;
+}
+
+
 ssize_t get_message_size(int socket) {
     int32_t size;
     ssize_t read_bytes =
