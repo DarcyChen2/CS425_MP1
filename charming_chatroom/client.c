@@ -200,13 +200,17 @@ void *read_from_server(void *arg) {
     cancellation_args.buffer = &buffer;
     cancellation_args.msg = NULL;
     pthread_cleanup_push(thread_cancellation_handler, &cancellation_args);
+    // int msg_count = 0;
 
     while (retval > 0) {
         retval = get_message_size(serverSocket);
         if (retval > 0) {
             buffer = calloc(1, retval);
             retval = read_all_from_socket(serverSocket, buffer, retval);
+            ssize_t msg_num = get_msg_num(serverSocket);
+            printf("msg_num is %lu\n", msg_num); // debug
         }
+
         if (retval > 0){
             int is_self = 1;
             unsigned int len = strlen(name);
@@ -287,3 +291,5 @@ int main(int argc, char **argv) {
 
     return 0;
 }
+
+

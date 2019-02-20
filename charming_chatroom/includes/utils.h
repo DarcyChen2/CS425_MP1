@@ -7,6 +7,27 @@
  */
 #define MSG_SIZE (256)
 
+
+typedef struct node { 
+    int data; 
+  
+    // Lower values indicate higher priority 
+    int priority; 
+  
+    struct node* next; 
+  
+} Node; 
+
+Node* newNode(int d, int p);
+
+int peek(Node** head); 
+
+void pop(Node** head);
+
+void push(Node** head, int d, int p);
+
+int isEmpty(Node** head); 
+
 /**
  * Builds a message in the form of
  * <name>: <message>\n
@@ -35,6 +56,11 @@ ssize_t get_message_size(int socket);
  */
 ssize_t write_message_size(size_t size, int socket);
 
+
+ssize_t get_msg_num(int socket);
+
+
+ssize_t write_msg_num(size_t size, int socket);
 
 /**
  * Attempts to read all count bytes from socket into buffer.

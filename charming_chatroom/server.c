@@ -20,10 +20,10 @@
 #define MAX_CLIENTS 10
 
 void *process_client(void *p);
-void write_to_clients(const char *message, size_t size); 
+void write_to_clients(const char *message, const int msg_num, size_t size); 
 
 static volatile int ready_go; // broadcast + msg count
-// static volatile int msg_count;
+static volatile int msg_count;
 static volatile int serverSocket;
 static volatile int endSession;
 static volatile int n;
@@ -33,7 +33,7 @@ static volatile int clients[MAX_CLIENTS];
 static volatile char* clients_name[MAX_CLIENTS];
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-// static pthread_mutex_t mutex_1 = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mutex_1 = PTHREAD_MUTEX_INITIALIZER;
 static struct addrinfo *addr_result;
 
 /**
@@ -209,7 +209,7 @@ void run_server(char *port) {
                 ready_go = 1;
                 /*broadcast "READY"*/
                 printf("ready!\n"); // debug info
-                write_to_clients("READY", 6);
+                write_to_clients("READY", -1, 6);
             }    
 
         }
@@ -228,13 +228,16 @@ void run_server(char *port) {
  * message  - the message to send to all clients.
  * size     - length in bytes of message to send.
  */
-void write_to_clients(const char *message, size_t size) {
+void write_to_clients(const char *message, const int msg_num, size_t size) {
     pthread_mutex_lock(&mutex);
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i] != -1) {
             ssize_t retval = write_message_size(size, clients[i]);
             if (retval > 0) {
                 retval = write_all_to_socket(clients[i], message, size);
+                if(ready_go && msg_num != -1){
+                    write_msg_num(msg_num, clients[i]);
+                }
             }
             if (retval == -1) {
                 perror("write(): ");
@@ -257,6 +260,7 @@ void *process_client(void *p) {
     intptr_t clientId = (intptr_t)p;
     ssize_t retval = 1;
     char *buffer = NULL;
+    int msg_num = -1;
 
     while (retval > 0 && endSession == 0) {
         retval = get_message_size(clients[clientId]);
@@ -271,7 +275,15 @@ void *process_client(void *p) {
                 clients_name[clientId] = strdup(buffer);
                 pthread_mutex_unlock(&mutex);
             }else{
-                write_to_clients(buffer, retval);                  
+                if(ready_go){
+                    pthread_mutex_lock(&mutex_1);
+                    msg_num = msg_count;
+                    msg_count++;
+                    pthread_mutex_unlock(&mutex_1);
+
+                    write_to_clients(buffer, msg_num, retval);
+                }
+              
             }
         }
 
@@ -295,7 +307,11 @@ void *process_client(void *p) {
     clients_name[clientId] = NULL;
     pthread_mutex_unlock(&mutex);
 
-    write_to_clients(leave_msg, msg_len);   
+    pthread_mutex_lock(&mutex_1);
+    msg_num = msg_count;
+    msg_count++;
+    pthread_mutex_unlock(&mutex_1);
+    write_to_clients(leave_msg, msg_num, msg_len);   
     free(leave_msg);
 
     return NULL;
